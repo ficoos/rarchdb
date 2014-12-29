@@ -1,0 +1,7 @@
+*.swp
+*~
+*.o
+*.pyc
+rmsgpack_test
+dat_converter
+rarchdb_tool
