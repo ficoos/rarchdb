@@ -1,9 +1,13 @@
-#ifndef __RMSGPACK_ENDIAN_H
-#define __RMSGPACK_ENDIAN_H
+#ifndef __RARCHDB_MSGPACK_ENDIAN_H
+#define __RARCHDB_MSGPACK_ENDIAN_H
 
 #include <stdint.h>
 
-static inline uint8_t is_little_endian(void)
+#ifndef INLINE
+#define INLINE inline
+#endif
+
+static INLINE uint8_t is_little_endian(void)
 {
    union
    {
@@ -14,6 +18,7 @@ static inline uint8_t is_little_endian(void)
    u.x = 1;
    return u.y[0];
 }
+
 #define swap16(val)				\
 	((((uint16_t)(val) & 0x00ff) << 8)	\
 	 | (((uint16_t)(val) & 0xff00) >> 8))

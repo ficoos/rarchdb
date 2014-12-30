@@ -8,7 +8,7 @@
 #include <unistd.h>
 
 #include "rarchdb.h"
-#include "parser.h"
+#include "db_parser.h"
 
 #define MAX_TOKEN 256
 

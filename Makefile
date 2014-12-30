@@ -3,12 +3,12 @@ DAT_CONVERTER_OBJ = rmsgpack.o \
 		    rmsgpack_dom.o \
 		    rarchdb.o \
 		    bintree.o \
-		    parser.o \
+		    db_parser.o \
 		    dat_converter.o \
 		    $(NULL)
 RARCHDB_TOOL_OBJ = rmsgpack.o \
 		    rmsgpack_dom.o \
-		    parser.o \
+		    db_parser.o \
 		    rarchdb_tool.o \
 		    bintree.o \
 		    rarchdb.o \

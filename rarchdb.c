@@ -13,7 +13,7 @@
 #include "rmsgpack_dom.h"
 #include "rmsgpack.h"
 #include "bintree.h"
-#include "endian.h"
+#include "rarchdb_endian.h"
 
 #define MAGIC_NUMBER "RARCHDB"
 
