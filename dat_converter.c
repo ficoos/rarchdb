@@ -102,7 +102,7 @@ static int load_bin(int fd, struct rmsgpack_dom_value *out)
 static int dat_value_provider(void *ctx, struct rmsgpack_dom_value *out)
 {
    int rv, i;
-   static const int field_count = 20;
+   static const int field_count = 22;
    int fd = *((int*)ctx);
    char* key;
 
@@ -141,6 +141,16 @@ static int dat_value_provider(void *ctx, struct rmsgpack_dom_value *out)
             goto failed;
       }
       else if (strncmp(key, "releaseyear", sizeof("releaseyear")) == 0)
+      {
+         if ((rv = load_uint(fd, &out->map.items[i].value)) < 0)
+            goto failed;
+      }
+      else if (strncmp(key, "rumble", sizeof("rumble")) == 0)
+      {
+         if ((rv = load_uint(fd, &out->map.items[i].value)) < 0)
+            goto failed;
+      }
+      else if (strncmp(key, "analog", sizeof("analog")) == 0)
       {
          if ((rv = load_uint(fd, &out->map.items[i].value)) < 0)
             goto failed;
