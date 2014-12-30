@@ -102,7 +102,7 @@ static int load_bin(int fd, struct rmsgpack_dom_value *out)
 static int dat_value_provider(void *ctx, struct rmsgpack_dom_value *out)
 {
    int rv, i;
-   static const int field_count = 11;
+   static const int field_count = 12;
    int fd = *((int*)ctx);
    char* key;
 
@@ -128,6 +128,11 @@ static int dat_value_provider(void *ctx, struct rmsgpack_dom_value *out)
       else if (strncmp(key, "description", sizeof("description")) == 0)
       {
          if ((rv = load_string(fd, &out->map.items[i].value)) < 0)
+            goto failed;
+      }
+      else if (strncmp(key, "users", sizeof("users")) == 0)
+      {
+         if ((rv = load_uint(fd, &out->map.items[i].value)) < 0)
             goto failed;
       }
       else if (strncmp(key, "releasemonth", sizeof("releasemonth")) == 0)
