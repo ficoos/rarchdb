@@ -102,7 +102,7 @@ static int load_bin(int fd, struct rmsgpack_dom_value *out)
 static int dat_value_provider(void *ctx, struct rmsgpack_dom_value *out)
 {
    int rv, i;
-   static const int field_count = 13;
+   static const int field_count = 14;
    int fd = *((int*)ctx);
    char* key;
 
@@ -143,6 +143,11 @@ static int dat_value_provider(void *ctx, struct rmsgpack_dom_value *out)
       else if (strncmp(key, "releaseyear", sizeof("releaseyear")) == 0)
       {
          if ((rv = load_uint(fd, &out->map.items[i].value)) < 0)
+            goto failed;
+      }
+      else if (strncmp(key, "serial", sizeof("serial")) == 0)
+      {
+         if ((rv = load_string(fd, &out->map.items[i].value)) < 0)
             goto failed;
       }
       else if (strncmp(key, "esrb_rating", sizeof("esrb_rating")) == 0)
