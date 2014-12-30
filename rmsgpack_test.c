@@ -31,7 +31,9 @@ static void stub_state_push_array(struct stub_state *s, uint32_t size)
 	printf("[");
 }
 
-static void stub_state_pre_print(struct stub_state *s) {}
+static void stub_state_pre_print(struct stub_state *s)
+{
+}
 
 static void stub_state_post_print(struct stub_state *s)
 {
@@ -147,12 +149,14 @@ static struct rmsgpack_read_callbacks stub_callbacks = {
 	stub_read_array_start
 };
 
-int main() {
+int main(void)
+{
 	int fd;
 	/*
 	int fd = open("test.msgpack", O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
 	int rv = 0;
-	if (fd == -1) {
+	if (fd == -1)
+   {
 		printf("Could not open file: %s", strerror(errno));
 		return errno;
 	}

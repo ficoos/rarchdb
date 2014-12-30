@@ -111,7 +111,8 @@ static void rarchdb_write_index_header(int fd, struct rarchdb_index *idx)
 	rmsgpack_write_uint(fd, idx->next);
 }
 
-void rarchdb_close(struct rarchdb *db) {
+void rarchdb_close(struct rarchdb *db)
+{
 	close(db->fd);
 	db->fd = -1;
 }

@@ -4,7 +4,7 @@
 #include "rarchdb.h"
 #include "rmsgpack_dom.h"
 
-static int list_db()
+static int list_db(void)
 {
 	return 0;
 }

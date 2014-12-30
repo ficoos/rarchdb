@@ -329,9 +329,8 @@ int rmsgpack_dom_write(int fd, const struct rmsgpack_dom_value *obj)
          return rmsgpack_write_bin(fd, obj->binary.buff, obj->binary.len);
          break;
       case RDT_MAP:
-         if ((rv = rmsgpack_write_map_header(fd, obj->map.len)) < 0) {
+         if ((rv = rmsgpack_write_map_header(fd, obj->map.len)) < 0)
             return rv;
-         }
          written += rv;
          for (i = 0; i < obj->map.len; i++)
          {
