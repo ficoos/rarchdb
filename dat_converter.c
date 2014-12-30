@@ -130,6 +130,28 @@ static int dat_value_provider(void *ctx, struct rmsgpack_dom_value *out)
          if ((rv = load_string(fd, &out->map.items[i].value)) < 0)
             goto failed;
       }
+#if 0
+      else if (strncmp(key, "releasemonth", sizeof("releasemonth")) == 0)
+      {
+         if ((rv = load_uint(fd, &out->map.items[i].value)) < 0)
+            goto failed;
+      }
+      else if (strncmp(key, "releaseyear", sizeof("releaseyear")) == 0)
+      {
+         if ((rv = load_uint(fd, &out->map.items[i].value)) < 0)
+            goto failed;
+      }
+#endif
+      else if (strncmp(key, "esrb_rating", sizeof("esrb_rating")) == 0)
+      {
+         if ((rv = load_string(fd, &out->map.items[i].value)) < 0)
+            goto failed;
+      }
+      else if (strncmp(key, "publisher", sizeof("publisher")) == 0)
+      {
+         if ((rv = load_string(fd, &out->map.items[i].value)) < 0)
+            goto failed;
+      }
       else if (strncmp(key, "rom", sizeof("rom")) == 0)
       {
          if (find_token(fd, "name") < 0)
