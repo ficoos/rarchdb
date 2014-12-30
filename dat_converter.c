@@ -102,7 +102,7 @@ static int load_bin(int fd, struct rmsgpack_dom_value *out)
 static int dat_value_provider(void *ctx, struct rmsgpack_dom_value *out)
 {
    int rv, i;
-   static const int field_count = 14;
+   static const int field_count = 20;
    int fd = *((int*)ctx);
    char* key;
 
@@ -155,7 +155,32 @@ static int dat_value_provider(void *ctx, struct rmsgpack_dom_value *out)
          if ((rv = load_string(fd, &out->map.items[i].value)) < 0)
             goto failed;
       }
+      else if (strncmp(key, "elspa_rating", sizeof("elspa_rating")) == 0)
+      {
+         if ((rv = load_string(fd, &out->map.items[i].value)) < 0)
+            goto failed;
+      }
+      else if (strncmp(key, "pegi_rating", sizeof("pegi_rating")) == 0)
+      {
+         if ((rv = load_string(fd, &out->map.items[i].value)) < 0)
+            goto failed;
+      }
+      else if (strncmp(key, "cero_rating", sizeof("cero_rating")) == 0)
+      {
+         if ((rv = load_string(fd, &out->map.items[i].value)) < 0)
+            goto failed;
+      }
+      else if (strncmp(key, "developers", sizeof("developers")) == 0)
+      {
+         if ((rv = load_string(fd, &out->map.items[i].value)) < 0)
+            goto failed;
+      }
       else if (strncmp(key, "publisher", sizeof("publisher")) == 0)
+      {
+         if ((rv = load_string(fd, &out->map.items[i].value)) < 0)
+            goto failed;
+      }
+      else if (strncmp(key, "origin", sizeof("origin")) == 0)
       {
          if ((rv = load_string(fd, &out->map.items[i].value)) < 0)
             goto failed;
@@ -186,6 +211,11 @@ static int dat_value_provider(void *ctx, struct rmsgpack_dom_value *out)
       else if (strncmp(key, "md5", sizeof("md5")) == 0)
       {
          if ((rv = load_bin(fd, &out->map.items[i].value)) < 0)
+            goto failed;
+      }
+      else if (strncmp(key, "serial", sizeof("serial")) == 0)
+      {
+         if ((rv = load_string(fd, &out->map.items[i].value)) < 0)
             goto failed;
       }
       else if (strncmp(key, ")", sizeof(")")) == 0)
