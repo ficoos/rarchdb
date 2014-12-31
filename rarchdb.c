@@ -23,7 +23,7 @@
 
 struct rarchdb_header
 {
-	char magic_number[7];
+	char magic_number[sizeof(MAGIC_NUMBER)-1];
 	uint64_t metadata_offset;
 };
 
@@ -66,7 +66,7 @@ int rarchdb_create(int fd, rarchdb_value_provider value_provider, void *ctx)
    struct rmsgpack_dom_value item = {};
    struct rarchdb_header header = {};
    struct rarchdb_metadata md;
-   strcpy(header.magic_number, MAGIC_NUMBER);
+   memcpy(header.magic_number, MAGIC_NUMBER, sizeof(MAGIC_NUMBER)-1);
    off_t root = lseek(fd, 0, SEEK_CUR);
    // We write the header in the end because we need to know the size of
    // the db first
@@ -189,7 +189,7 @@ static int binsearch(const void *buff, const void *item, uint64_t count, uint8_t
 {
    int mid = count / 2;
    int item_size = field_size + sizeof(uint64_t);
-   const void *current = buff + (mid * item_size);
+   uint64_t *current = (uint64_t*)buff + (mid * item_size);
    int rv = node_compare(current, item, &field_size);
 
    if (rv == 0)
@@ -223,7 +223,8 @@ int rarchdb_find_entry(struct rarchdb *db, const char *index_name, const void *k
 
    while (nread < bufflen)
    {
-      rv = read(db->fd, buff + nread, bufflen - nread);
+      void *buff_ = (uint64_t*)buff + nread;
+      rv = read(db->fd, buff_, bufflen - nread);
       if (rv <= 0)
       {
          free(buff);
@@ -291,6 +292,7 @@ int rarchdb_create_index(struct rarchdb *db, const char* name, const char *field
    struct rmsgpack_dom_value item;
    struct rmsgpack_dom_value *field;
    void* buff = NULL;
+   uint64_t *buff_u64 = NULL;
    uint8_t field_size = 0;
    struct bintree tree;
    uint64_t item_loc = rarchdb_tell(db);
@@ -349,7 +351,8 @@ int rarchdb_create_index(struct rarchdb *db, const char* name, const char *field
       }
 
       memcpy(buff, field->binary.buff, field_size);
-      memcpy(buff + field_size, &item_loc, sizeof(uint64_t));
+	  buff_u64 = (uint64_t*)buff + field_size;
+      memcpy(buff_u64, &item_loc, sizeof(uint64_t));
 
       if (bintree_insert(&tree, buff) != 0)
       {
