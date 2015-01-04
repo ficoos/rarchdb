@@ -3,5 +3,5 @@
 *.o
 *.pyc
 rmsgpack_test
-dat_converter
+lua_converter
 rarchdb_tool
