@@ -1,5 +1,5 @@
-#ifndef __RMSGPACK_H__
-#define __RMSGPACK_H__
+#ifndef __RARCHDB_MSGPACK_H__
+#define __RARCHDB_MSGPACK_H__
 
 #include <stdint.h>
 

@@ -1,14 +1,15 @@
-CFLAGS=-std=c99 -g
+CFLAGS   = -g
+INCFLAGS = -I. -I../libretro-sdk/include
 DAT_CONVERTER_OBJ = rmsgpack.o \
 		    rmsgpack_dom.o \
 		    rarchdb.o \
 		    bintree.o \
-		    parser.o \
+		    db_parser.o \
 		    dat_converter.o \
 		    $(NULL)
 RARCHDB_TOOL_OBJ = rmsgpack.o \
 		    rmsgpack_dom.o \
-		    parser.o \
+		    db_parser.o \
 		    rarchdb_tool.o \
 		    bintree.o \
 		    rarchdb.o \
@@ -17,15 +18,15 @@ RARCHDB_TOOL_OBJ = rmsgpack.o \
 all: dat_converter rmsgpack_test rarchdb_tool
 
 %.o: %.c
-	${CC} $< -c ${CFLAGS} -o $@
+	${CC} $(INCFLAGS) $< -c ${CFLAGS} -o $@
 
 dat_converter: ${DAT_CONVERTER_OBJ}
-	${CC} ${DAT_CONVERTER_OBJ} -o $@
+	${CC} $(INCFLAGS) ${DAT_CONVERTER_OBJ} -o $@
 
 rarchdb_tool: ${RARCHDB_TOOL_OBJ}
-	${CC} ${RARCHDB_TOOL_OBJ} -o $@
+	${CC} $(INCFLAGS) ${RARCHDB_TOOL_OBJ} -o $@
 
 rmsgpack_test:
-	gcc rmsgpack.c rmsgpack_test.c -std=c99 -g -o $@
+	${CC} $(INCFLAGS) rmsgpack.c rmsgpack_test.c -g -o $@
 clean:
 	rm -rf *.o rmsgpack_test dat_converter rarchdb_tool
