@@ -27,7 +27,11 @@ end
 -- more records to insert.
 function get_value()
 	return {
-		key = "value",
+		key = "value", -- will be saved as string
+		num = 3, -- will be saved as int
+		bin = binary("some string"), -- will be saved as binary
+		unum = uint(3), -- will be saved as uint
+		some_bool = true, -- will be saved as bool
 	}
 end
 ~~~
