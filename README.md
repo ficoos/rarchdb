@@ -26,7 +26,8 @@ end
 -- the function should return a table for insertion or nil when there are no
 -- more records to insert.
 function get_value()
-	local args = {...}
-	local script name = args[1]
+	return {
+		key = "value",
+	}
 end
 ~~~
