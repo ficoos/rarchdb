@@ -19,7 +19,7 @@ In order to write you own converter you must have a lua file that implements the
 -- arguments and set up the ground for db insertion
 function init(...)
 	local args = {...}
-	local script name = args[1]
+	local script_name = args[1]
 end
 
 -- this is in iterator function. It is called before each insert.
