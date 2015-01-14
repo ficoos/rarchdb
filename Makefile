@@ -10,7 +10,6 @@ LUA_CONVERTER_OBJ = rmsgpack.o \
 
 RARCHDB_TOOL_OBJ = rmsgpack.o \
 		    rmsgpack_dom.o \
-		    db_parser.o \
 		    rarchdb_tool.o \
 		    bintree.o \
 		    rarchdb.o \
