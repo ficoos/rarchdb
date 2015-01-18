@@ -351,7 +351,6 @@ clean:
 }
 
 struct registered_func registered_functions[100] = {
-	{"equals", equals},
 	{"is_true", is_true},
 	{"or", operator_or},
 	{"and", operator_and},
