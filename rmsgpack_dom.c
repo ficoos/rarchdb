@@ -36,7 +36,7 @@ static int dom_reader_state_push(struct dom_reader_state *s, struct rmsgpack_dom
 static int dom_read_nil(void *data)
 {
 	struct dom_reader_state *dom_state = (struct dom_reader_state*)data;
-	struct rmsgpack_dom_value *v = 
+	struct rmsgpack_dom_value *v =
 		(struct rmsgpack_dom_value*)dom_reader_state_pop(dom_state);
 	v->type = RDT_NULL;
 	return 0;
@@ -45,7 +45,7 @@ static int dom_read_nil(void *data)
 static int dom_read_bool(int value, void *data)
 {
 	struct dom_reader_state *dom_state = (struct dom_reader_state*)data;
-	struct rmsgpack_dom_value *v = 
+	struct rmsgpack_dom_value *v =
 		(struct rmsgpack_dom_value*)dom_reader_state_pop(dom_state);
 	v->type = RDT_BOOL;
 	v->bool_ = value;
@@ -55,7 +55,7 @@ static int dom_read_bool(int value, void *data)
 static int dom_read_int(int64_t value, void *data)
 {
 	struct dom_reader_state *dom_state = (struct dom_reader_state*)data;
-	struct rmsgpack_dom_value *v = 
+	struct rmsgpack_dom_value *v =
 		(struct rmsgpack_dom_value*)dom_reader_state_pop(dom_state);
 	v->type = RDT_INT;
 	v->int_ = value;
@@ -65,7 +65,7 @@ static int dom_read_int(int64_t value, void *data)
 static int dom_read_uint(uint64_t value, void *data)
 {
 	struct dom_reader_state *dom_state = (struct dom_reader_state*)data;
-	struct rmsgpack_dom_value *v = 
+	struct rmsgpack_dom_value *v =
 		(struct rmsgpack_dom_value*)dom_reader_state_pop(dom_state);
 	v->type = RDT_UINT;
 	v->uint_ = value;
@@ -75,7 +75,7 @@ static int dom_read_uint(uint64_t value, void *data)
 static int dom_read_string(char* value, uint32_t len, void *data)
 {
 	struct dom_reader_state *dom_state = (struct dom_reader_state*)data;
-	struct rmsgpack_dom_value *v = 
+	struct rmsgpack_dom_value *v =
 		(struct rmsgpack_dom_value*)dom_reader_state_pop(dom_state);
 	v->type = RDT_STRING;
 	v->string.len = len;
@@ -86,7 +86,7 @@ static int dom_read_string(char* value, uint32_t len, void *data)
 static int dom_read_bin(void* value, uint32_t len, void *data)
 {
 	struct dom_reader_state *dom_state = (struct dom_reader_state*)data;
-	struct rmsgpack_dom_value *v = 
+	struct rmsgpack_dom_value *v =
 		(struct rmsgpack_dom_value*)dom_reader_state_pop(dom_state);
 	v->type = RDT_BINARY;
 	v->binary.len = len;
@@ -224,11 +224,11 @@ int rmsgpack_dom_value_cmp(
       case RDT_NULL:
          return 0;
       case RDT_BOOL:
-         return a->bool_ == b->bool_ ? 1 : 0;
+         return a->bool_ == b->bool_ ? 0 : 1;
       case RDT_INT:
-         return a->int_ == b->int_ ? 1 : 0;
+         return a->int_ == b->int_ ? 0 : 1;
       case RDT_UINT:
-         return a->uint_ == b->uint_ ? 1 : 0;
+         return a->uint_ == b->uint_ ? 0 : 1;
       case RDT_STRING:
          if (a->string.len != b->string.len)
             return 1;

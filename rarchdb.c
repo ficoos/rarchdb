@@ -18,6 +18,7 @@
 #include "rmsgpack.h"
 #include "bintree.h"
 #include "rarchdb_endian.h"
+#include "query.h"
 
 #define MAGIC_NUMBER "RARCHDB"
 
@@ -90,13 +91,6 @@ int rarchdb_create(int fd, rarchdb_value_provider value_provider, void *ctx)
    rarchdb_write_metadata(fd, &md);
    lseek(fd, root, SEEK_SET);
    write(fd, &header, sizeof(header));
-   printf(
-#ifdef _WIN32
-   "Created DB with %I64u entries\n"
-#else
-   "Created DB with %llu entries\n"
-#endif
-   ,(unsigned long long)item_count);
    return 0;
 }
 
@@ -159,7 +153,6 @@ int rarchdb_open(const char *path, struct rarchdb *db)
    db->count = md.count;
    db->first_index_offset = lseek(fd, 0, SEEK_CUR);
    db->fd = fd;
-   rarchdb_read_reset(db);
    return 0;
 error:
    close(fd);
@@ -205,8 +198,12 @@ static int binsearch(const void *buff, const void *item, uint64_t count, uint8_t
    return binsearch(current + item_size, item, count - mid, field_size, offset);
 }
 
-int rarchdb_find_entry(struct rarchdb *db, const char *index_name, const void *key)
-{
+int rarchdb_find_entry(
+	struct rarchdb * db,
+	const char * index_name,
+	const void * key,
+	struct rmsgpack_dom_value * out
+) {
    struct rarchdb_index idx;
    int rv;
    void *buff;
@@ -215,13 +212,12 @@ int rarchdb_find_entry(struct rarchdb *db, const char *index_name, const void *k
 
    if (rarchdb_find_index(db, index_name, &idx) < 0)
    {
-      rarchdb_read_reset(db);
       return -1;
    }
-   
+
    bufflen = idx.next;
    buff = malloc(bufflen);
-   
+
    if (!buff)
       return -ENOMEM;
 
@@ -239,36 +235,84 @@ int rarchdb_find_entry(struct rarchdb *db, const char *index_name, const void *k
 
    rv = binsearch(buff, key, db->count, idx.key_size, &offset);
    free(buff);
-   rarchdb_read_reset(db);
 
    if (rv == 0)
       lseek(db->fd, offset, SEEK_SET);
 
+   rv = rmsgpack_dom_read(db->fd, out);
+   if (rv < 0)
+	return rv;
+
+
    return rv;
 }
 
-int rarchdb_read_reset(struct rarchdb *db)
+int rarchdb_cursor_reset(struct rarchdb_cursor *cursor)
 {
-   db->eof = 0;
-   return lseek(db->fd, db->root + sizeof(struct rarchdb_header), SEEK_SET);
+   cursor->eof = 0;
+   return lseek(
+	cursor->fd,
+	cursor->db->root + sizeof(struct rarchdb_header),
+	SEEK_SET
+);
 }
 
-int rarchdb_read_item(struct rarchdb *db, struct rmsgpack_dom_value *out)
-{
-   int rv;
-	if (db->eof)
+int rarchdb_cursor_read_item(
+	struct rarchdb_cursor * cursor,
+	struct rmsgpack_dom_value * out
+) {
+	int rv;
+	if (cursor->eof)
 		return EOF;
 
-	rv = rmsgpack_dom_read(db->fd, out);
+retry:
+	rv = rmsgpack_dom_read(cursor->fd, out);
 	if (rv < 0)
 		return rv;
 
 	if (out->type == RDT_NULL)
-   {
-		db->eof = 1;
+	{
+		cursor->eof = 1;
 		return EOF;
 	}
 
+	if (cursor->query) {
+		if(!rarchdb_query_filter(cursor->query, out)) {
+			goto retry;
+		}
+	}
+
+	return 0;
+}
+
+void rarchdb_cursor_close(struct rarchdb_cursor * cursor) {
+	close(cursor->fd);
+	cursor->is_valid = 0;
+	cursor->fd = -1;
+	cursor->eof = 1;
+	cursor->db = NULL;
+	if (cursor->query) {
+		rarchdb_query_free(cursor->query);
+	}
+	cursor->query = NULL;
+}
+
+int rarchdb_cursor_open(
+	struct rarchdb * db,
+	struct rarchdb_cursor * cursor,
+	rarchdb_query * q
+) {
+	cursor->fd = dup(db->fd);
+	if (cursor->fd == -1) {
+		return -errno;
+	}
+	cursor->db = db;
+	cursor->is_valid = 1;
+	rarchdb_cursor_reset(cursor);
+	cursor->query = q;
+	if (q) {
+		rarchdb_query_inc_ref(q);
+	}
 	return 0;
 }
 
@@ -282,7 +326,7 @@ static int node_iter(void *value, void *ctx)
    return -1;
 }
 
-uint64_t rarchdb_tell(struct rarchdb *db)
+static uint64_t rarchdb_tell(struct rarchdb *db)
 {
 	return lseek(db->fd, 0, SEEK_CUR);
 }
@@ -301,15 +345,19 @@ int rarchdb_create_index(struct rarchdb *db, const char* name, const char *field
    struct bintree tree;
    uint64_t item_loc = rarchdb_tell(db);
    uint64_t idx_header_offset;
+   struct rarchdb_cursor cur;
 
    bintree_new(&tree, node_compare, &field_size);
-   rarchdb_read_reset(db);
+   if (rarchdb_cursor_open(db, &cur, NULL) != 0) {
+	   rv = -1;
+	   goto clean;
+   }
 
    key.type = RDT_STRING;
    key.string.len = strlen(field_name);
    // We know we aren't going to change it
    key.string.buff = (char *) field_name;
-   while(rarchdb_read_item(db, &item) == 0)
+   while(rarchdb_cursor_read_item(&cur, &item) == 0)
    {
       if (item.type != RDT_MAP)
       {
@@ -390,6 +438,8 @@ clean:
    rmsgpack_dom_value_free(&item);
    if (buff)
       free(buff);
-   rarchdb_read_reset(db);
+   if (cur.is_valid) {
+	   rarchdb_cursor_close(&cur);
+   }
    return 0;
 }

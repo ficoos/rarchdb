@@ -4,15 +4,11 @@
 #include "rarchdb.h"
 #include "rmsgpack_dom.h"
 
-static int list_db(void)
-{
-	return 0;
-}
-
 int main(int argc, char** argv)
 {
    int rv;
    struct rarchdb db;
+   struct rarchdb_cursor cur;
    struct rmsgpack_dom_value item;
    if (argc < 3)
    {
@@ -21,6 +17,7 @@ int main(int argc, char** argv)
       printf("\tlist\n");
       printf("\tcreate-index <index name> <field name>\n");
       printf("\tfind <index name> <value>\n");
+      printf("\tfind query <query expression>\n");
       return 1;
    }
 
@@ -32,15 +29,46 @@ int main(int argc, char** argv)
       printf("Could not open db file '%s': %s\n", path, strerror(-rv));
       return 1;
    }
-
    if (strcmp(command, "list") == 0)
    {
+      if ((rv = rarchdb_cursor_open(&db, &cur, NULL)) != 0) {
+         printf("Could not open cursor: %s\n", strerror(-rv));
+	 return 1;
+      }
+
       if (argc != 3)
       {
          printf("Usage: %s <db file> list\n", argv[0]);
          return 1;
       }
-      while(rarchdb_read_item(&db, &item) == 0)
+      while(rarchdb_cursor_read_item(&cur, &item) == 0)
+      {
+         rmsgpack_dom_value_print(&item);
+         printf("\n");
+         rmsgpack_dom_value_free(&item);
+      }
+   }
+   if (strcmp(command, "query") == 0)
+   {
+      if (argc != 4)
+      {
+         printf("Usage: %s <db file> query <query expression>\n", argv[0]);
+         return 1;
+      }
+      const char * query_exp = argv[3];
+      const char * error = NULL;
+      rarchdb_query * q = rarchdb_query_compile(&db, query_exp, strlen(query_exp), &error);
+      if (error) {
+	      printf("%s\n", error);
+	      return 1;
+      }
+
+      if ((rv = rarchdb_cursor_open(&db, &cur, q)) != 0) {
+         printf("Could not open cursor: %s\n", strerror(-rv));
+	 return 1;
+      }
+
+      while(rarchdb_cursor_read_item(&cur, &item) == 0)
       {
          rmsgpack_dom_value_print(&item);
          printf("\n");
@@ -94,18 +122,14 @@ int main(int argc, char** argv)
          bin_value[i/2] = h * 16 + l;
       }
 
-      if (rarchdb_find_entry(&db, index_name, bin_value) != 0)
+      if (rarchdb_find_entry(&db, index_name, bin_value, &item) != 0)
       {
          printf("Could not find item\n");
          return 1;
       }
-
-      if (rarchdb_read_item(&db, &item) == 0)
-      {
-         rmsgpack_dom_value_print(&item);
-         printf("\n");
-         rmsgpack_dom_value_free(&item);
-      }
+      rmsgpack_dom_value_print(&item);
+      printf("\n");
+      rmsgpack_dom_value_free(&item);
    }
    else
    {
