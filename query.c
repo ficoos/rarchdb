@@ -22,94 +22,107 @@ struct buffer {
 /* Errors */
 static void raise_too_many_arguments(const char ** error) {
 	snprintf(
-		tmp_error_buff,
-		MAX_ERROR_LEN,
-		"Too many arguments in function call"
+	        tmp_error_buff,
+	        MAX_ERROR_LEN,
+	        "Too many arguments in function call"
 	);
 	*error = tmp_error_buff;
 }
 
-static void raise_expected_number(off_t where, const char ** error) {
+static void raise_expected_number(
+        off_t where,
+        const char ** error
+) {
 	snprintf(
-		tmp_error_buff,
-		MAX_ERROR_LEN,
-		"%lu::Expected number",
-		where
+	        tmp_error_buff,
+	        MAX_ERROR_LEN,
+	        "%lu::Expected number",
+	        where
 	);
 	*error = tmp_error_buff;
 }
 
-static void raise_expected_string(off_t where, const char ** error) {
+static void raise_expected_string(
+        off_t where,
+        const char ** error
+) {
 	snprintf(
-		tmp_error_buff,
-		MAX_ERROR_LEN,
-		"%lu::Expected string",
-		where
+	        tmp_error_buff,
+	        MAX_ERROR_LEN,
+	        "%lu::Expected string",
+	        where
 	);
 	*error = tmp_error_buff;
 }
 
-static void raise_unexpected_eof(off_t where, const char ** error) {
+static void raise_unexpected_eof(
+        off_t where,
+        const char ** error
+) {
 	snprintf(
-		tmp_error_buff,
-		MAX_ERROR_LEN,
-		"%lu::Unexpected EOF",
-		where
+	        tmp_error_buff,
+	        MAX_ERROR_LEN,
+	        "%lu::Unexpected EOF",
+	        where
 	);
 	*error = tmp_error_buff;
 }
 
 static void raise_enomem(const char ** error) {
 	snprintf(
-		tmp_error_buff,
-		MAX_ERROR_LEN,
-		"Out of memory"
+	        tmp_error_buff,
+	        MAX_ERROR_LEN,
+	        "Out of memory"
 	);
 	*error = tmp_error_buff;
 }
 
 static void raise_unknown_function(
-	off_t where,
-	const char * name,
-	size_t len,
-	const char ** error
+        off_t where,
+        const char * name,
+        size_t len,
+        const char ** error
 ) {
 	int n = snprintf(
-		tmp_error_buff,
-		MAX_ERROR_LEN,
-		"%lu::Unknown function '",
-		where
-	);
+	                tmp_error_buff,
+	                MAX_ERROR_LEN,
+	                "%lu::Unknown function '",
+	                where
+	        );
 	if (len < (MAX_ERROR_LEN - n - 3)) {
 		strncpy(tmp_error_buff + n, name, len);
 	}
 	strcpy(tmp_error_buff + n + len, "'");
 	*error = tmp_error_buff;
 }
-static void raise_expected_eof(off_t where, char found, const char ** error) {
+static void raise_expected_eof(
+        off_t where,
+        char found,
+        const char ** error
+) {
 	snprintf(
-		tmp_error_buff,
-		MAX_ERROR_LEN,
-		"%lu::Expected EOF found '%c'",
-		where,
-		found
+	        tmp_error_buff,
+	        MAX_ERROR_LEN,
+	        "%lu::Expected EOF found '%c'",
+	        where,
+	        found
 	);
 	*error = tmp_error_buff;
 }
 
 static void raise_unexpected_char(
-	off_t where,
-	char expected,
-	char found,
-	const char ** error
+        off_t where,
+        char expected,
+        char found,
+        const char ** error
 ) {
 	snprintf(
-		tmp_error_buff,
-		MAX_ERROR_LEN,
-		"%lu::Expected '%c' found '%c'",
-		where,
-		expected,
-		found
+	        tmp_error_buff,
+	        MAX_ERROR_LEN,
+	        "%lu::Expected '%c' found '%c'",
+	        where,
+	        expected,
+	        found
 	);
 	*error = tmp_error_buff;
 }
@@ -121,7 +134,11 @@ enum argument_type {
 
 struct argument;
 
-typedef struct rmsgpack_dom_value(*rarch_query_func)(struct rmsgpack_dom_value input, unsigned argc, const struct argument * argv);
+typedef struct rmsgpack_dom_value (* rarch_query_func)(
+        struct rmsgpack_dom_value input,
+        unsigned argc,
+        const struct argument * argv
+);
 
 struct invocation {
 	rarch_query_func func;
@@ -137,7 +154,7 @@ struct argument {
 	};
 };
 
-static void argument_free(struct argument *arg) {
+static void argument_free(struct argument * arg) {
 	unsigned i;
 	if (arg->type == AT_FUNCTION) {
 		for (i = 0; i < arg->invocation.argc; i++) {
@@ -160,15 +177,15 @@ struct registered_func {
 };
 
 static struct buffer parse_argument(
-	struct buffer buff,
-	struct argument * arg,
-	const char ** error
+        struct buffer buff,
+        struct argument * arg,
+        const char ** error
 );
 
 static struct rmsgpack_dom_value is_true(
-	struct rmsgpack_dom_value input,
-	unsigned argc,
-	const struct argument * argv
+        struct rmsgpack_dom_value input,
+        unsigned argc,
+        const struct argument * argv
 ) {
 	struct rmsgpack_dom_value res;
 	res.type = RDT_BOOL;
@@ -182,9 +199,9 @@ static struct rmsgpack_dom_value is_true(
 }
 
 static struct rmsgpack_dom_value equals (
-	struct rmsgpack_dom_value input,
-	unsigned argc,
-	const struct argument * argv
+        struct rmsgpack_dom_value input,
+        unsigned argc,
+        const struct argument * argv
 ) {
 	struct rmsgpack_dom_value res;
 	struct argument arg;
@@ -207,9 +224,9 @@ static struct rmsgpack_dom_value equals (
 }
 
 static struct rmsgpack_dom_value operator_or (
-	struct rmsgpack_dom_value input,
-	unsigned argc,
-	const struct argument * argv
+        struct rmsgpack_dom_value input,
+        unsigned argc,
+        const struct argument * argv
 ) {
 	struct rmsgpack_dom_value res;
 	unsigned i;
@@ -220,13 +237,13 @@ static struct rmsgpack_dom_value operator_or (
 			res = equals(input, 1, &argv[i]);
 		} else {
 			res = is_true(
-				argv[i].invocation.func(input,
-					argv[i].invocation.argc,
-					argv[i].invocation.argv
-				),
-				0,
-				NULL
-			);
+			                argv[i].invocation.func(input,
+			                                        argv[i].invocation.argc,
+			                                        argv[i].invocation.argv
+			                ),
+			                0,
+			                NULL
+			        );
 		}
 
 		if (res.bool_) {
@@ -237,9 +254,9 @@ static struct rmsgpack_dom_value operator_or (
 }
 
 static struct rmsgpack_dom_value between (
-	struct rmsgpack_dom_value input,
-	unsigned argc,
-	const struct argument * argv
+        struct rmsgpack_dom_value input,
+        unsigned argc,
+        const struct argument * argv
 ) {
 	struct rmsgpack_dom_value res;
 	unsigned i;
@@ -254,23 +271,23 @@ static struct rmsgpack_dom_value between (
 	if (argv[0].value.type != RDT_INT || argv[1].value.type != RDT_INT) {
 		return res;
 	}
-	switch(input.type) {
-		case RDT_INT:
-			res.bool_ = input.int_ >= argv[0].value.int_ && input.int_ <= argv[1].value.int_;
-			break;
-		case RDT_UINT:
-			res.bool_ = input.int_ >= argv[0].value.uint_ && input.int_ <= argv[1].value.int_;
-			break;
-		default:
-			return res;
+	switch (input.type) {
+	case RDT_INT:
+		res.bool_ = input.int_ >= argv[0].value.int_ && input.int_ <= argv[1].value.int_;
+		break;
+	case RDT_UINT:
+		res.bool_ = input.int_ >= argv[0].value.uint_ && input.int_ <= argv[1].value.int_;
+		break;
+	default:
+		return res;
 	}
 	return res;
 }
 
 static struct rmsgpack_dom_value operator_and (
-	struct rmsgpack_dom_value input,
-	unsigned argc,
-	const struct argument * argv
+        struct rmsgpack_dom_value input,
+        unsigned argc,
+        const struct argument * argv
 ) {
 	struct rmsgpack_dom_value res;
 	unsigned i;
@@ -281,13 +298,13 @@ static struct rmsgpack_dom_value operator_and (
 			res = equals(input, 1, &argv[i]);
 		} else {
 			res = is_true(
-				argv[i].invocation.func(input,
-					argv[i].invocation.argc,
-					argv[i].invocation.argv
-				),
-				0,
-				NULL
-			);
+			                argv[i].invocation.func(input,
+			                                        argv[i].invocation.argc,
+			                                        argv[i].invocation.argv
+			                ),
+			                0,
+			                NULL
+			        );
 		}
 
 		if (!res.bool_) {
@@ -298,9 +315,9 @@ static struct rmsgpack_dom_value operator_and (
 }
 
 static struct rmsgpack_dom_value all_map (
-	struct rmsgpack_dom_value input,
-	unsigned argc,
-	const struct argument * argv
+        struct rmsgpack_dom_value input,
+        unsigned argc,
+        const struct argument * argv
 ) {
 	struct rmsgpack_dom_value res;
 	struct rmsgpack_dom_value key;
@@ -336,10 +353,10 @@ static struct rmsgpack_dom_value all_map (
 			res = equals(*value, 1, &arg);
 		} else {
 			res = is_true(arg.invocation.func(
-				*value,
-				arg.invocation.argc,
-				arg.invocation.argv
-			), 0, NULL);
+			                      *value,
+			                      arg.invocation.argc,
+			                      arg.invocation.argv
+			              ), 0, NULL);
 			value = NULL;
 		}
 		if (!res.bool_) {
@@ -360,23 +377,23 @@ struct registered_func registered_functions[100] = {
 
 static struct buffer chomp(struct buffer buff) {
 	off_t i = 0;
-	for (; buff.offset < buff.len && isspace(buff.data[buff.offset]); buff.offset++);
+	for (; buff.offset < buff.len && isspace(buff.data[buff.offset]); buff.offset++) ;
 	return buff;
 }
 
 static struct buffer expect_char(
-	struct buffer buff,
-	char c,
-	const char ** error
+        struct buffer buff,
+        char c,
+        const char ** error
 ) {
 	if (buff.offset >= buff.len) {
 		raise_unexpected_eof(buff.offset, error);
 	} else if (buff.data[buff.offset] != c) {
 		raise_unexpected_char(
-			buff.offset,
-			c,
-			buff.data[buff.offset],
-			error
+		        buff.offset,
+		        c,
+		        buff.data[buff.offset],
+		        error
 		);
 	} else {
 		buff.offset++;
@@ -384,7 +401,10 @@ static struct buffer expect_char(
 	return buff;
 }
 
-static struct buffer expect_eof(struct buffer buff, const char ** error) {
+static struct buffer expect_eof(
+        struct buffer buff,
+        const char ** error
+) {
 	buff = chomp(buff);
 	if (buff.offset < buff.len) {
 		raise_expected_eof(buff.offset, buff.data[buff.offset], error);
@@ -392,16 +412,19 @@ static struct buffer expect_eof(struct buffer buff, const char ** error) {
 	return buff;
 }
 
-static int peek(struct buffer buff, const char * data) {
+static int peek(
+        struct buffer buff,
+        const char * data
+) {
 	size_t remain = buff.len - buff.offset;
 	if (remain < strlen(data)) {
 		return 0;
 	}
 	return (strncmp(
-		buff.data + buff.offset,
-		data,
-		strlen(data)
-	) == 0);
+	                buff.data + buff.offset,
+	                data,
+	                strlen(data)
+	        ) == 0);
 }
 
 static int is_eot(struct buffer buff) {
@@ -409,9 +432,9 @@ static int is_eot(struct buffer buff) {
 }
 
 static void peek_char(
-	struct buffer buff,
-	char * c,
-	const char ** error
+        struct buffer buff,
+        char * c,
+        const char ** error
 ) {
 	if (is_eot(buff)) {
 		raise_unexpected_eof(buff.offset, error);
@@ -421,9 +444,9 @@ static void peek_char(
 }
 
 static struct buffer get_char(
-	struct buffer buff,
-	char * c,
-	const char ** error
+        struct buffer buff,
+        char * c,
+        const char ** error
 ) {
 	if (is_eot(buff)) {
 		raise_unexpected_eof(buff.offset, error);
@@ -435,9 +458,9 @@ static struct buffer get_char(
 }
 
 static struct buffer parse_string(
-	struct buffer buff,
-	struct rmsgpack_dom_value * value,
-	const char ** error
+        struct buffer buff,
+        struct rmsgpack_dom_value * value,
+        const char ** error
 ) {
 	char terminator;
 	char c;
@@ -459,16 +482,16 @@ static struct buffer parse_string(
 		value->type = RDT_STRING;
 		value->string.len = (buff.data + buff.offset) - str_start - 1;
 		value->string.buff = calloc(
-			value->string.len + 1,
-			sizeof(char)
-		);
+		                value->string.len + 1,
+		                sizeof(char)
+		        );
 		if (!value->string.buff) {
 			raise_enomem(error);
 		} else {
 			memcpy(
-				value->string.buff,
-				str_start,
-				value->string.len
+			        value->string.buff,
+			        str_start,
+			        value->string.len
 			);
 		}
 	}
@@ -476,15 +499,15 @@ static struct buffer parse_string(
 }
 
 static struct buffer parse_integer(
-	struct buffer buff,
-	struct rmsgpack_dom_value * value,
-	const char ** error
+        struct buffer buff,
+        struct rmsgpack_dom_value * value,
+        const char ** error
 ) {
 	value->type = RDT_INT;
-	if(sscanf(buff.data + buff.offset, "%ld", &value->int_) == 0) {
+	if (sscanf(buff.data + buff.offset, "%ld", &value->int_) == 0) {
 		raise_expected_number(buff.offset, error);
 	} else {
-		while(isdigit(buff.data[buff.offset])) {
+		while (isdigit(buff.data[buff.offset])) {
 			buff.offset++;
 		}
 	}
@@ -492,9 +515,9 @@ static struct buffer parse_integer(
 }
 
 static struct buffer parse_value(
-	struct buffer buff,
-	struct rmsgpack_dom_value * value,
-	const char ** error
+        struct buffer buff,
+        struct rmsgpack_dom_value * value,
+        const char ** error
 ) {
 	buff = chomp(buff);
 	if (peek(buff, "nil")) {
@@ -508,9 +531,9 @@ static struct buffer parse_value(
 		buff.offset += strlen("false");
 		value->type = RDT_BOOL;
 		value->bool_ = 0;
-	//} else if (peek(buff, "{")) {
-	//} else if (peek(buff, "[")) {
-	//} else if (peek(buff, "b\"") || peek(buff, "b'")) {
+		//} else if (peek(buff, "{")) {
+		//} else if (peek(buff, "[")) {
+		//} else if (peek(buff, "b\"") || peek(buff, "b'")) {
 	} else if (peek(buff, "\"") || peek(buff, "'")) {
 		buff = parse_string(buff, value, error);
 	} else if (isdigit(buff.data[buff.offset])) {
@@ -520,10 +543,10 @@ static struct buffer parse_value(
 }
 
 static struct buffer get_ident(
-	struct buffer buff,
-	const char ** ident,
-	size_t * len,
-	const char ** error
+        struct buffer buff,
+        const char ** ident,
+        size_t * len,
+        const char ** error
 ) {
 	char c;
 	if (is_eot(buff)) {
@@ -556,9 +579,9 @@ clean:
 }
 
 static struct buffer parse_method_call(
-	struct buffer buff,
-	struct invocation * invocation,
-	const char ** error
+        struct buffer buff,
+        struct invocation * invocation,
+        const char ** error
 ) {
 	const char * func_name;
 	size_t func_name_len;
@@ -580,7 +603,7 @@ static struct buffer parse_method_call(
 		goto clean;
 	}
 
-	while(rf->name) {
+	while (rf->name) {
 		if (strncmp(rf->name, func_name, func_name_len) == 0) {
 			invocation->func = rf->func;
 			break;
@@ -590,10 +613,10 @@ static struct buffer parse_method_call(
 
 	if (!invocation->func) {
 		raise_unknown_function(
-			buff.offset,
-			func_name,
-			func_name_len,
-			error
+		        buff.offset,
+		        func_name,
+		        func_name_len,
+		        error
 		);
 		goto clean;
 	}
@@ -640,19 +663,19 @@ success:
 }
 
 static struct buffer parse_argument(
-	struct buffer buff,
-	struct argument * arg,
-	const char ** error
+        struct buffer buff,
+        struct argument * arg,
+        const char ** error
 ) {
 	buff = chomp(buff);
 	if (
-		isalpha(buff.data[buff.offset])
-		&& !(
-			peek(buff, "nil")
-			|| peek(buff, "true")
-			|| peek(buff, "false")
-		)
-	){
+	        isalpha(buff.data[buff.offset])
+	        && !(
+	                peek(buff, "nil")
+	                || peek(buff, "true")
+	                || peek(buff, "false")
+	        )
+	) {
 		arg->type = AT_FUNCTION;
 		buff = parse_method_call(buff, &arg->invocation, error);
 	} else {
@@ -663,9 +686,9 @@ static struct buffer parse_argument(
 }
 
 static struct buffer parse_table(
-	struct buffer buff,
-	struct invocation * invocation,
-	const char ** error
+        struct buffer buff,
+        struct invocation * invocation,
+        const char ** error
 ) {
 	struct argument args[MAX_ARGS];
 	unsigned argi = 0;
@@ -752,10 +775,10 @@ void rarchdb_query_free(rarchdb_query * q) {
 }
 
 rarchdb_query * rarchdb_query_compile(
-	struct rarchdb * db,
-	const char* query,
-	size_t buff_len,
-	const char ** error
+        struct rarchdb * db,
+        const char * query,
+        size_t buff_len,
+        const char ** error
 ) {
 	struct buffer buff;
 	struct query * q;
@@ -784,7 +807,7 @@ rarchdb_query * rarchdb_query_compile(
 	}
 	goto success;
 clean:
-	if(q) {
+	if (q) {
 		rarchdb_query_free(q);
 	}
 success:
@@ -792,12 +815,15 @@ success:
 }
 
 void rarchdb_query_inc_ref(rarchdb_query * q) {
-	struct query* rq = q;
+	struct query * rq = q;
 	rq->ref_count += 1;
 }
 
-int rarchdb_query_filter(rarchdb_query * q, struct rmsgpack_dom_value * v) {
-	struct invocation inv = ((struct query*)q)->root;
+int rarchdb_query_filter(
+        rarchdb_query * q,
+        struct rmsgpack_dom_value * v
+) {
+	struct invocation inv = ((struct query *)q)->root;
 	struct rmsgpack_dom_value res = inv.func(*v, inv.argc, inv.argv);
 	return (res.type == RDT_BOOL && res.bool_);
 }

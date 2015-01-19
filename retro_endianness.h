@@ -26,68 +26,63 @@
 #include <retro_inline.h>
 #include <stdint.h>
 
-#define SWAP16(x) ((uint16_t)(				      \
-         (((uint16_t)(x) & 0x00ff) << 8)      |	\
-         (((uint16_t)(x) & 0xff00) >> 8)        \
-          ))
+#define SWAP16(x) ((uint16_t)(                                \
+	                   (((uint16_t)(x) & 0x00ff) << 8)      | \
+	                   (((uint16_t)(x) & 0xff00) >> 8)        \
+	           ))
 
 #define SWAP32(x) ((uint32_t)(           \
-         (((uint32_t)(x) & 0x000000ff) << 24) | \
-         (((uint32_t)(x) & 0x0000ff00) <<  8) | \
-         (((uint32_t)(x) & 0x00ff0000) >>  8) | \
-         (((uint32_t)(x) & 0xff000000) >> 24)   \
-         ))
+	                   (((uint32_t)(x) & 0x000000ff) << 24) | \
+	                   (((uint32_t)(x) & 0x0000ff00) <<  8) | \
+	                   (((uint32_t)(x) & 0x00ff0000) >>  8) | \
+	                   (((uint32_t)(x) & 0xff000000) >> 24)   \
+	           ))
 
-static INLINE uint8_t is_little_endian(void)
-{
-   union
-   {
-      uint16_t x;
-      uint8_t y[2];
-   } u;
+static INLINE uint8_t is_little_endian(void){
+	union {
+		uint16_t x;
+		uint8_t y[2];
+	} u;
 
-   u.x = 1;
-   return u.y[0];
+	u.x = 1;
+	return u.y[0];
 }
 
-static INLINE uint32_t swap_if_big32(uint32_t val)
-{
-   if (is_little_endian())
-      return val;
-   return (val >> 24) | ((val >> 8) & 0xFF00) |
-      ((val << 8) & 0xFF0000) | (val << 24);
+static INLINE uint32_t swap_if_big32(uint32_t val){
+	if (is_little_endian())
+		return val;
+	return (val >> 24) | ((val >> 8) & 0xFF00) |
+	       ((val << 8) & 0xFF0000) | (val << 24);
 }
 
-static INLINE uint32_t swap_if_little32(uint32_t val)
-{
-   if (is_little_endian())
-      return (val >> 24) | ((val >> 8) & 0xFF00) |
-         ((val << 8) & 0xFF0000) | (val << 24);
-   return val;
+static INLINE uint32_t swap_if_little32(uint32_t val){
+	if (is_little_endian())
+		return (val >> 24) | ((val >> 8) & 0xFF00) |
+		       ((val << 8) & 0xFF0000) | (val << 24);
+	return val;
 }
 
-static INLINE uint16_t swap_if_big16(uint16_t val)
-{
-   if (is_little_endian())
-      return val;
-   return (val >> 8) | (val << 8);
+static INLINE uint16_t swap_if_big16(uint16_t val){
+	if (is_little_endian())
+		return val;
+	return (val >> 8) | (val << 8);
 }
 
-static INLINE uint16_t swap_if_little16(uint16_t val)
-{
-   if (is_little_endian())
-      return (val >> 8) | (val << 8);
-   return val;
+static INLINE uint16_t swap_if_little16(uint16_t val){
+	if (is_little_endian())
+		return (val >> 8) | (val << 8);
+	return val;
 }
 
-static INLINE void store32be(uint32_t *addr, uint32_t data)
-{
-   *addr = is_little_endian() ? SWAP32(data) : data;
+static INLINE void store32be(
+        uint32_t * addr,
+        uint32_t data
+){
+	*addr = is_little_endian() ? SWAP32(data) : data;
 }
 
-static INLINE uint32_t load32be(const uint32_t *addr)
-{
-   return is_little_endian() ? SWAP32(*addr) : *addr;
+static INLINE uint32_t load32be(const uint32_t * addr){
+	return is_little_endian() ? SWAP32(*addr) : *addr;
 }
 
 #endif

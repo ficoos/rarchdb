@@ -15,12 +15,16 @@
 
 int master_key = 1;
 
-const char *LUA_COMMON = " \
+const char * LUA_COMMON = " \
 function binary(s) if s ~= nil then return {binary = s} else return nil end end \
 function uint(s) if s ~= nil then return {uint = s} else return nil end end \
 ";
 
-static int call_init(lua_State *L, int argc, const char** argv) {
+static int call_init(
+        lua_State * L,
+        int argc,
+        const char ** argv
+) {
 	int rv = -1;
 	int i;
 
@@ -31,24 +35,27 @@ static int call_init(lua_State *L, int argc, const char** argv) {
 
 	if (lua_pcall(L, argc, 0, 0) != 0) {
 		printf(
-			"error running function `init': %s\n",
-			lua_tostring(L, -1)
+		        "error running function `init': %s\n",
+		        lua_tostring(L, -1)
 		);
 	}
 
 	return rv;
 }
 
-static int value_provider(void *ctx, struct rmsgpack_dom_value *out) {
+static int value_provider(
+        void * ctx,
+        struct rmsgpack_dom_value * out
+) {
 	int rv;
-	lua_State *L = ctx;
+	lua_State * L = ctx;
 
 	lua_getglobal(L, "get_value");
 
 	if (lua_pcall(L, 0, 1, 0) != 0) {
 		printf(
-			"error running function `get_value': %s\n",
-			lua_tostring(L, -1)
+		        "error running function `get_value': %s\n",
+		        lua_tostring(L, -1)
 		);
 	}
 
@@ -63,10 +70,12 @@ static int value_provider(void *ctx, struct rmsgpack_dom_value *out) {
 	return rv;
 }
 
-int main(int argc, char **argv)
-{
-	const char* db_file;
-	const char* lua_file;
+int main(
+        int argc,
+        char ** argv
+){
+	const char * db_file;
+	const char * lua_file;
 	int dst = -1;
 	int rv = 0;
 
@@ -78,7 +87,7 @@ int main(int argc, char **argv)
 	db_file = argv[1];
 	lua_file = argv[2];
 
-	lua_State *L = luaL_newstate();
+	lua_State * L = luaL_newstate();
 	luaL_openlibs(L);
 	luaL_dostring(L, LUA_COMMON);
 
@@ -86,15 +95,14 @@ int main(int argc, char **argv)
 		return 1;
 	}
 
-	call_init(L, argc - 2, (const char**) argv + 2);
+	call_init(L, argc - 2, (const char **) argv + 2);
 
 	dst = open(db_file, O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
-	if (dst == -1)
-	{
+	if (dst == -1) {
 		printf(
-			"Could not open destination file '%s': %s\n",
-			db_file,
-			strerror(errno)
+		        "Could not open destination file '%s': %s\n",
+		        db_file,
+		        strerror(errno)
 		);
 		rv = errno;
 		goto clean;

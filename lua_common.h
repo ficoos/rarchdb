@@ -8,9 +8,9 @@
 #include "rmsgpack_dom.h"
 
 int rarchdb_lua_to_rmsgpack_value(
-	lua_State * L,
-	int index,
-	struct rmsgpack_dom_value *out
+        lua_State * L,
+        int index,
+        struct rmsgpack_dom_value * out
 );
 
 #endif

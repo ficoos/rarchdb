@@ -13,15 +13,15 @@
 #include "rarchdb.h"
 #include "lua_common.h"
 
-static int create_db (lua_State *L);
-static int db_new (lua_State *L);
-static int db_close (lua_State *L);
-static int db_cursor_open (lua_State *L);
-static int db_query (lua_State *L);
+static int create_db (lua_State * L);
+static int db_new (lua_State * L);
+static int db_close (lua_State * L);
+static int db_cursor_open (lua_State * L);
+static int db_query (lua_State * L);
 
-static int cursor_close (lua_State *L);
-static int cursor_read (lua_State *L);
-static int cursor_iter (lua_State *L);
+static int cursor_close (lua_State * L);
+static int cursor_read (lua_State * L);
+static int cursor_iter (lua_State * L);
 
 static const luaL_Reg testlib[] = {
 	{"create_db", create_db},
@@ -44,7 +44,7 @@ static const struct luaL_Reg rarchdb_mt [] = {
 };
 
 
-LUALIB_API int luaopen_testlib (lua_State *L) {
+LUALIB_API int luaopen_testlib (lua_State * L) {
 	luaL_newmetatable(L, "RarchDB.DB");
 	lua_pushstring(L, "__index");
 	lua_pushvalue(L, -2);
@@ -61,28 +61,31 @@ LUALIB_API int luaopen_testlib (lua_State *L) {
 	return 1;
 }
 
-static struct rarchdb_cursor * checkcursor(lua_State *L) {
-	void *ud = luaL_checkudata(L, 1, "RarchDB.Cursor");
+static struct rarchdb_cursor * checkcursor(lua_State * L) {
+	void * ud = luaL_checkudata(L, 1, "RarchDB.Cursor");
 	luaL_argcheck(L, ud != NULL, 1, "`RarchDB.Cursor' expected");
 	return ud;
 }
 
-static struct rarchdb * checkdb(lua_State *L) {
-	void *ud = luaL_checkudata(L, 1, "RarchDB.DB");
+static struct rarchdb * checkdb(lua_State * L) {
+	void * ud = luaL_checkudata(L, 1, "RarchDB.DB");
 	luaL_argcheck(L, ud != NULL, 1, "`RarchDB.DB' expected");
 	return ud;
 }
 
-static int value_provider(void *ctx, struct rmsgpack_dom_value *out) {
+static int value_provider(
+        void * ctx,
+        struct rmsgpack_dom_value * out
+) {
 	int rv;
-	lua_State *L = ctx;
+	lua_State * L = ctx;
 
 	lua_getfield(L, LUA_REGISTRYINDEX, "testlib_get_value");
 
 	if (lua_pcall(L, 0, 1, 0) != 0) {
 		printf(
-			"error running function `get_value': %s\n",
-			lua_tostring(L, -1)
+		        "error running function `get_value': %s\n",
+		        lua_tostring(L, -1)
 		);
 	}
 
@@ -97,20 +100,19 @@ static int value_provider(void *ctx, struct rmsgpack_dom_value *out) {
 	return rv;
 }
 
-static int create_db (lua_State *L) {
+static int create_db (lua_State * L) {
 	int dst;
 	const char * db_file;
 	int rv;
 	db_file = luaL_checkstring(L, -2);
-	if(!lua_isfunction(L, -1)) {
+	if (!lua_isfunction(L, -1)) {
 		lua_pushstring(L, "second argument must be a function");
 		lua_error(L);
 	}
 	lua_setfield(L, LUA_REGISTRYINDEX, "testlib_get_value");
 
 	dst = open(db_file, O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
-	if (dst == -1)
-	{
+	if (dst == -1) {
 		lua_pushstring(L, "Could not open destination file");
 		lua_error(L);
 	}
@@ -120,7 +122,7 @@ static int create_db (lua_State *L) {
 	return 0;
 }
 
-static int db_new (lua_State *L) {
+static int db_new (lua_State * L) {
 	struct rarchdb * db = NULL;
 	const char * db_file = NULL;
 	int rv;
@@ -138,24 +140,24 @@ static int db_new (lua_State *L) {
 	return 2;
 }
 
-static int db_close (lua_State *L) {
+static int db_close (lua_State * L) {
 	struct rarchdb * db = checkdb(L);
 	rarchdb_close(db);
 	return 0;
 }
 
-static int db_query (lua_State *L) {
+static int db_query (lua_State * L) {
 	int rv;
 	struct rarchdb_cursor * cursor = NULL;
 	struct rarchdb * db = checkdb(L);
 	const char * query = luaL_checkstring(L, -1);
 	const char * error = NULL;
 	rarchdb_query * q = rarchdb_query_compile(
-		db,
-		query,
-		strlen(query),
-		&error
-	);
+	                db,
+	                query,
+	                strlen(query),
+	                &error
+	        );
 	if (error) {
 		lua_pushnil(L);
 		lua_pushstring(L, error);
@@ -174,7 +176,7 @@ static int db_query (lua_State *L) {
 	}
 	return 2;
 }
-static int db_cursor_open (lua_State *L) {
+static int db_cursor_open (lua_State * L) {
 	int rv;
 	struct rarchdb_cursor * cursor = NULL;
 	struct rarchdb * db = checkdb(L);
@@ -190,86 +192,86 @@ static int db_cursor_open (lua_State *L) {
 	}
 	return 2;
 }
-static int cursor_close (lua_State *L) {
+static int cursor_close (lua_State * L) {
 	struct rarchdb_cursor * cursor = checkcursor(L);
 	rarchdb_cursor_close(cursor);
 	return 0;
 }
 
 static void push_rmsgpack_value(
-	lua_State * L,
-	struct rmsgpack_dom_value * value
+        lua_State * L,
+        struct rmsgpack_dom_value * value
 ) {
 	uint32_t i;
-	switch(value->type) {
-		case RDT_INT:
+	switch (value->type) {
+	case RDT_INT:
+		lua_pushnumber(
+		        L,
+		        value->int_
+		);
+		break;
+	case RDT_UINT:
+		lua_pushnumber(
+		        L,
+		        value->uint_
+		);
+		break;
+	case RDT_BINARY:
+		lua_pushlstring(
+		        L,
+		        value->binary.buff,
+		        value->binary.len
+		);
+		break;
+	case RDT_BOOL:
+		lua_pushboolean(
+		        L,
+		        value->bool_
+		);
+		break;
+	case RDT_NULL:
+		lua_pushnil(L);
+		break;
+	case RDT_STRING:
+		lua_pushlstring(
+		        L,
+		        value->string.buff,
+		        value->binary.len
+		);
+		break;
+	case RDT_MAP:
+		lua_createtable(L, 0, value->map.len);
+		for (i = 0; i < value->map.len; i++) {
+			push_rmsgpack_value(
+			        L,
+			        &value->map.items[i].key
+			);
+			push_rmsgpack_value(
+			        L,
+			        &value->map.items[i].value
+			);
+			lua_settable(L, -3);
+		}
+		break;
+	case RDT_ARRAY:
+		lua_createtable(L, value->array.len, 0);
+		for (i = 0; i < value->array.len; i++) {
 			lua_pushnumber(
-				L,
-				value->int_
+			        L,
+			        i + 1
 			);
-			break;
-		case RDT_UINT:
-			lua_pushnumber(
-				L,
-				value->uint_
+			push_rmsgpack_value(
+			        L,
+			        &value->array.items[i]
 			);
-			break;
-		case RDT_BINARY:
-			lua_pushlstring(
-				L,
-				value->binary.buff,
-				value->binary.len
-			);
-			break;
-		case RDT_BOOL:
-			lua_pushboolean(
-				L,
-				value->bool_
-			);
-			break;
-		case RDT_NULL:
-			lua_pushnil(L);
-			break;
-		case RDT_STRING:
-			lua_pushlstring(
-				L,
-				value->string.buff,
-				value->binary.len
-			);
-			break;
-		case RDT_MAP:
-			lua_createtable(L, 0, value->map.len);
-			for(i = 0; i < value->map.len; i++) {
-				push_rmsgpack_value(
-					L,
-					&value->map.items[i].key
-				);
-				push_rmsgpack_value(
-					L,
-					&value->map.items[i].value
-				);
-				lua_settable(L, -3);
-			}
-			break;
-		case RDT_ARRAY:
-			lua_createtable(L, value->array.len, 0);
-			for(i = 0; i < value->array.len; i++) {
-				lua_pushnumber(
-					L,
-					i + 1
-				);
-				push_rmsgpack_value(
-					L,
-					&value->array.items[i]
-				);
-				lua_settable(L, -3);
-			}
-			break;
+			lua_settable(L, -3);
+		}
+		break;
 	}
 
 }
 
-static int cursor_read (lua_State *L) {
+static int cursor_read (lua_State * L) {
 	struct rarchdb_cursor * cursor = checkcursor(L);
 	struct rmsgpack_dom_value value;
 	if (rarchdb_cursor_read_item(cursor, &value) == 0) {
@@ -280,7 +282,7 @@ static int cursor_read (lua_State *L) {
 	return 1;
 }
 
-static int cursor_iter (lua_State *L) {
+static int cursor_iter (lua_State * L) {
 	struct rarchdb_cursor * cursor = checkcursor(L);
 	luaL_getmetafield(L, -1, "read");
 	lua_pushvalue(L, -2);

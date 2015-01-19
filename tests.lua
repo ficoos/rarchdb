@@ -69,6 +69,7 @@ tests = {
     test_number_field = query_test({{a=3}, {a=4}}, {{a=3}}, "{'a':3}"),
     test_string_field = query_test({{a="test"}, {a=4}}, {{a="test"}}, "{'a':'test'}"),
     test_or_operator = query_test({{a="test"}, {a=4}, {a=5}}, {{a="test"}, {a=4}}, "{'a':or('test', 4)}"),
+    test_or_between = query_test({{a="test"}, {a=4}, {a=5}, {}}, {{a="test"}, {a=4}, {a=5}}, "{'a':or('test', between(2, 7))}"),
 }
 for name, cb in pairs(tests) do
     local ok, err = pcall(cb)

@@ -1,2 +1,4 @@
 #!/bin/sh
-./lua_converter "$2" dat_converter.lua "$1"
+rdb_file="$1"
+shift 1
+./lua_converter "$rdb_file" dat_converter.lua "$@"
