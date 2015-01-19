@@ -412,6 +412,12 @@ static struct buffer expect_eof(
 	return buff;
 }
 
+static struct buffer parse_table(
+        struct buffer buff,
+        struct invocation * invocation,
+        const char ** error
+);
+
 static int peek(
         struct buffer buff,
         const char * data
@@ -531,7 +537,6 @@ static struct buffer parse_value(
 		buff.offset += strlen("false");
 		value->type = RDT_BOOL;
 		value->bool_ = 0;
-		//} else if (peek(buff, "{")) {
 		//} else if (peek(buff, "[")) {
 		//} else if (peek(buff, "b\"") || peek(buff, "b'")) {
 	} else if (peek(buff, "\"") || peek(buff, "'")) {
@@ -678,6 +683,9 @@ static struct buffer parse_argument(
 	) {
 		arg->type = AT_FUNCTION;
 		buff = parse_method_call(buff, &arg->invocation, error);
+	} else if (peek(buff, "{")){
+		arg->type = AT_FUNCTION;
+		buff = parse_table(buff, &arg->invocation, error);
 	} else {
 		arg->type = AT_VALUE;
 		buff = parse_value(buff, &arg->value, error);
