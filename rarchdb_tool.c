@@ -29,7 +29,7 @@ int main(int argc, char** argv)
       printf("Could not open db file '%s': %s\n", path, strerror(-rv));
       return 1;
    }
-   if (strcmp(command, "list") == 0)
+   else if (strcmp(command, "list") == 0)
    {
       if ((rv = rarchdb_cursor_open(&db, &cur, NULL)) != 0) {
          printf("Could not open cursor: %s\n", strerror(-rv));
@@ -48,7 +48,7 @@ int main(int argc, char** argv)
          rmsgpack_dom_value_free(&item);
       }
    }
-   if (strcmp(command, "query") == 0)
+   else if (strcmp(command, "query") == 0)
    {
       if (argc != 4)
       {
@@ -133,7 +133,7 @@ int main(int argc, char** argv)
    }
    else
    {
-      printf("Unkown command %s\n", argv[1]);
+      printf("Unknown command %s\n", argv[1]);
       return 1;
    }
    rarchdb_close(&db);
