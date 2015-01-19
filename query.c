@@ -468,10 +468,13 @@ static struct buffer parse_string(
         struct rmsgpack_dom_value * value,
         const char ** error
 ) {
-	char terminator;
+	char terminator = '\0';
 	char c;
 	const char * str_start;
 	buff = get_char(buff, &terminator, error);
+	if (*error) {
+		return buff;
+	}
 	if (terminator != '"' && terminator != '\'') {
 		buff.offset--;
 		raise_expected_string(buff.offset, error);
