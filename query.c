@@ -686,7 +686,7 @@ static struct buffer parse_argument(
 	) {
 		arg->type = AT_FUNCTION;
 		buff = parse_method_call(buff, &arg->invocation, error);
-	} else if (peek(buff, "{")){
+	} else if (peek(buff, "{")) {
 		arg->type = AT_FUNCTION;
 		buff = parse_table(buff, &arg->invocation, error);
 	} else {
@@ -727,16 +727,16 @@ static struct buffer parse_table(
 				args[argi].value.type = RDT_STRING;
 				args[argi].value.string.len = ident_len;
 				args[argi].value.string.buff = calloc(
-					ident_len + 1,
-					sizeof(char)
-				);
+				                ident_len + 1,
+				                sizeof(char)
+				        );
 				if (!args[argi].value.string.buff) {
 					goto clean;
 				}
 				strncpy(
-					args[argi].value.string.buff,
-					ident_name,
-					ident_len
+				        args[argi].value.string.buff,
+				        ident_name,
+				        ident_len
 				);
 			}
 		} else {
