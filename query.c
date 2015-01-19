@@ -694,6 +694,9 @@ static struct buffer parse_table(
 	unsigned argi = 0;
 	unsigned i;
 
+	const char * ident_name;
+	size_t ident_len;
+
 	memset(args, 0, sizeof(struct argument) * MAX_ARGS);
 	buff = chomp(buff);
 	buff = expect_char(buff, '{', error);
@@ -707,7 +710,27 @@ static struct buffer parse_table(
 			raise_too_many_arguments(error);
 			goto clean;
 		}
-		buff = parse_string(buff, &args[argi].value, error);
+		if (isalpha(buff.data[buff.offset])) {
+			buff = get_ident(buff, &ident_name, &ident_len, error);
+			if (!*error) {
+				args[argi].value.type = RDT_STRING;
+				args[argi].value.string.len = ident_len;
+				args[argi].value.string.buff = calloc(
+					ident_len + 1,
+					sizeof(char)
+				);
+				if (!args[argi].value.string.buff) {
+					goto clean;
+				}
+				strncpy(
+					args[argi].value.string.buff,
+					ident_name,
+					ident_len
+				);
+			}
+		} else {
+			buff = parse_string(buff, &args[argi].value, error);
+		}
 		if (*error) {
 			goto clean;
 		}
