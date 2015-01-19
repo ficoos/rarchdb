@@ -32,7 +32,7 @@ TESTLIB_FLAGS = ${CFLAGS} ${LUA_FLAGS} -shared -fpic
 
 .PHONY: all clean check
 
-all: rmsgpack_test rarchdb_tool lua_converter parser
+all: rmsgpack_test rarchdb_tool lua_converter
 
 %.o: %.c
 	${CC} $(INCFLAGS) $< -c ${CFLAGS} -o $@
