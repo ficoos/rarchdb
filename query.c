@@ -622,7 +622,7 @@ static struct buffer parse_method_call(
 	}
 
 	buff = chomp(buff);
-	while (1) {
+	while (!peek(buff, ")")) {
 		if (argi >= MAX_ARGS) {
 			raise_too_many_arguments(error);
 			goto clean;
@@ -705,7 +705,7 @@ static struct buffer parse_table(
 	}
 
 	buff = chomp(buff);
-	while (1) {
+	while (!peek(buff, "}")) {
 		if (argi >= MAX_ARGS) {
 			raise_too_many_arguments(error);
 			goto clean;
@@ -823,10 +823,18 @@ rarchdb_query * rarchdb_query_compile(
 		if (*error) {
 			goto clean;
 		}
+	} else if (isalpha(buff.data[buff.offset])) {
+		buff = parse_method_call(buff, &q->root, error);
 	}
+
 	buff = expect_eof(buff, error);
 	if (*error) {
 		goto clean;
+	}
+
+	if (q->root.func == NULL) {
+		raise_unexpected_eof(buff.offset, error);
+		return NULL;
 	}
 	goto success;
 clean:
