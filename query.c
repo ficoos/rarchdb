@@ -38,8 +38,12 @@ static void raise_expected_number(
 	snprintf(
 	        tmp_error_buff,
 	        MAX_ERROR_LEN,
-	        "%lu::Expected number",
-	        where
+#ifdef _WIN32
+	        "%I64u::Expected number",
+#else
+	        "%llu::Expected number",
+#endif
+	        (unsigned long long)where
 	);
 	*error = tmp_error_buff;
 }
@@ -51,8 +55,12 @@ static void raise_expected_string(
 	snprintf(
 	        tmp_error_buff,
 	        MAX_ERROR_LEN,
-	        "%lu::Expected string",
-	        where
+#ifdef _WIN32
+            "%I64u::Expected string",
+#else
+	        "%llu::Expected string",
+#endif
+	        (unsigned long long)where
 	);
 	*error = tmp_error_buff;
 }
@@ -64,8 +72,12 @@ static void raise_unexpected_eof(
 	snprintf(
 	        tmp_error_buff,
 	        MAX_ERROR_LEN,
-	        "%lu::Unexpected EOF",
-	        where
+#ifdef _WIN32
+            "%I64u::Unexpected EOF",
+#else
+	        "%llu::Unexpected EOF",
+#endif
+	        (unsigned long long)where
 	);
 	*error = tmp_error_buff;
 }
@@ -88,8 +100,12 @@ static void raise_unknown_function(
 	int n = snprintf(
 	                tmp_error_buff,
 	                MAX_ERROR_LEN,
-	                "%lu::Unknown function '",
-	                where
+#ifdef _WIN32
+	                "%I64u::Unknown function '",
+#else
+	                "%llu::Unknown function '",
+#endif
+	                (unsigned long long)where
 	        );
 	if (len < (MAX_ERROR_LEN - n - 3)) {
 		strncpy(tmp_error_buff + n, name, len);
@@ -105,8 +121,12 @@ static void raise_expected_eof(
 	snprintf(
 	        tmp_error_buff,
 	        MAX_ERROR_LEN,
-	        "%lu::Expected EOF found '%c'",
-	        where,
+#ifdef _WIN32
+	        "%I64u::Expected EOF found '%c'",
+#else
+	        "%llu::Expected EOF found '%c'",
+#endif
+	        (unsigned long long)where,
 	        found
 	);
 	*error = tmp_error_buff;
@@ -121,8 +141,12 @@ static void raise_unexpected_char(
 	snprintf(
 	        tmp_error_buff,
 	        MAX_ERROR_LEN,
-	        "%lu::Expected '%c' found '%c'",
-	        where,
+#ifdef _WIN32
+	        "%I64u::Expected '%c' found '%c'",
+#else
+	        "%llu::Expected '%c' found '%c'",
+#endif
+	        (unsigned long long)where,
 	        expected,
 	        found
 	);
@@ -554,7 +578,14 @@ static struct buffer parse_integer(
         const char ** error
 ) {
 	value->type = RDT_INT;
-	if (sscanf(buff.data + buff.offset, "%ld", &value->int_) == 0) {
+	if (sscanf(buff.data + buff.offset,
+#ifdef _WIN32
+               "%I64d",
+#else
+               "%lld",
+#endif
+               &value->int_) == 0)
+    {
 		raise_expected_number(buff.offset, error);
 	} else {
 		while (isdigit(buff.data[buff.offset])) {
