@@ -7,7 +7,7 @@
 #include "rarchdb.h"
 
 #include "rmsgpack_dom.h"
-#include "rl_fnmatch.h"
+#include <compat/fnmatch.h>
 
 #define MAX_ERROR_LEN 256
 #define MAX_ARGS 50
