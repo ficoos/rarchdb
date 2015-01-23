@@ -150,18 +150,16 @@ function get_value()
             rumble = uint(tonumber(t.rumble)),
             analog = uint(tonumber(t.analog)),
             
-            edge_review = t.edge_review,
             edge_rating = uint(tonumber(t.edge_rating)),
             edge_issue = uint(tonumber(t.edge_issue)),
 
             barcode = t.barcode,
             esrb_rating = t.esrb_rating,
             elspa_rating = t.elspa_rating,
-            bbfc_rating = t.bbfc_rating,
             pegi_rating = t.pegi_rating,
             cero_rating = t.cero_rating,
 
-            developer = t.developer,
+            developers = t.developers,
             publisher = t.publisher,
             origin = t.origin,
 
