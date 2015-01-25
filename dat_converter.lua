@@ -149,20 +149,24 @@ function get_value()
             releaseyear = uint(tonumber(t.releaseyear)),
             rumble = uint(tonumber(t.rumble)),
             analog = uint(tonumber(t.analog)),
+            
+            edge_rating = uint(tonumber(t.edge_rating)),
+            edge_issue = uint(tonumber(t.edge_issue)),
 
+            barcode = t.barcode,
             esrb_rating = t.esrb_rating,
             elspa_rating = t.elspa_rating,
             pegi_rating = t.pegi_rating,
             cero_rating = t.cero_rating,
 
-            developers = t.developers,
+            developer = t.developer,
             publisher = t.publisher,
             origin = t.origin,
 
             crc = binary(unhex(t.rom.crc)),
             md5 = binary(unhex(t.rom.md5)),
             sha1 = binary(unhex(t.rom.sha1)),
-            serial = binary(t.rom.serial),
+            serial = binary(t.serial or t.rom.serial),
         }
     end
 end
