@@ -139,13 +139,13 @@ static void libretrodb_write_index_header(int fd, libretrodb_index_t * idx)
 	rmsgpack_write_uint(fd, idx->next);
 }
 
-void libretrodb_close(libretrodb_t * db)
+void libretrodb_close(libretrodb_t *db)
 {
 	close(db->fd);
 	db->fd = -1;
 }
 
-int libretrodb_open(const char * path, libretrodb_t * db)
+int libretrodb_open(const char *path, libretrodb_t *db)
 {
    libretrodb_header_t header;
    libretrodb_metadata_t md;
@@ -155,6 +155,7 @@ int libretrodb_open(const char * path, libretrodb_t * db)
    if (fd == -1)
       return -errno;
 
+   strcpy(db->path, path);
    db->root = lseek(fd, 0, SEEK_CUR);
 
    if ((rv = read(fd, &header, sizeof(header))) == -1)
@@ -328,13 +329,18 @@ retry:
  **/
 void libretrodb_cursor_close(libretrodb_cursor_t *cursor)
 {
+   if (!cursor)
+      return;
+
 	close(cursor->fd);
 	cursor->is_valid = 0;
 	cursor->fd = -1;
 	cursor->eof = 1;
 	cursor->db = NULL;
+
 	if (cursor->query)
 		libretrodb_query_free(cursor->query);
+
 	cursor->query = NULL;
 }
 
@@ -348,26 +354,23 @@ void libretrodb_cursor_close(libretrodb_cursor_t *cursor)
  *
  * Returns: 0 if successful, otherwise negative.
  **/
-int libretrodb_cursor_open(
-        libretrodb_t *db,
-        libretrodb_cursor_t *cursor,
-        libretrodb_query_t *q
-)
+int libretrodb_cursor_open(libretrodb_t *db, libretrodb_cursor_t *cursor,
+      libretrodb_query_t *q)
 {
-	cursor->fd = dup(db->fd);
+   cursor->fd = dup(db->fd);
 
-	if (cursor->fd == -1)
-		return -errno;
+   if (cursor->fd == -1)
+      return -errno;
 
-	cursor->db = db;
-	cursor->is_valid = 1;
-	libretrodb_cursor_reset(cursor);
-	cursor->query = q;
+   cursor->db = db;
+   cursor->is_valid = 1;
+   libretrodb_cursor_reset(cursor);
+   cursor->query = q;
 
-	if (q)
-		libretrodb_query_inc_ref(q);
+   if (q)
+      libretrodb_query_inc_ref(q);
 
-	return 0;
+   return 0;
 }
 
 static int node_iter(void * value, void * ctx)

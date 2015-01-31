@@ -31,7 +31,7 @@ local function dat_lexer(f, fname)
                 location.column = location.column + #tok
             end
         end
-        print(tok)
+        -- print(tok)
         return tok, tok_loc
     end
 end
@@ -192,12 +192,15 @@ function get_value()
 
             edge_rating = uint(tonumber(t.edge_rating)),
             edge_issue = uint(tonumber(t.edge_issue)),
+            edge_review = t.edge_review,
 
+            enhancement_hw = t.enhancement_hw,
             barcode = t.barcode,
             esrb_rating = t.esrb_rating,
             elspa_rating = t.elspa_rating,
             pegi_rating = t.pegi_rating,
             cero_rating = t.cero_rating,
+            franchise   = t.franchise,
 
             developer = t.developer,
             publisher = t.publisher,
