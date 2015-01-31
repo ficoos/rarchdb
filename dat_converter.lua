@@ -10,12 +10,12 @@ local function dat_lexer(f, fname)
             if not line then
                 return nil
             end
-            pre_space, tok, line = string.match(line, "^(%s*)(..-)([()]*%s.*)")
+            pre_space, tok, line = string.match(line, "^(%s*)([()]?)(.*)")
+            if not tok or #tok == 0 then
+                tok, line = string.match(line, "^([^%s()]+)(.*)")
+            end
             if tok and string.match(tok, "^\"") then
                 tok, line = string.match(tok..line, "^\"([^\"]-)\"(.*)")
-            elseif tok and string.match(tok, "^[()]") then
-                line = tok:sub(2) .. line
-                tok = tok:sub(1,1)
             end
             location.column = location.column  + #(pre_space or "")
             tok_loc = {
@@ -31,7 +31,6 @@ local function dat_lexer(f, fname)
                 location.column = location.column + #tok
             end
         end
-        -- print(tok)
         return tok, tok_loc
     end
 end
